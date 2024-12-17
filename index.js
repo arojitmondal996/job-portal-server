@@ -69,6 +69,14 @@ async function run() {
       .send({ success: true });
     })
 
+    app.post('/logout', (req, res) => {
+      res.clearCookie('token', {
+        httpOnly: true,
+        secure: false
+      })
+      .send({success: true})
+    })
+
     // 11111111 get er madhome sob data ke ek sate load korbo
     app.get('/jobs', logger, async (req, res) => {
       // 6666666 email thakle sei user ke match kore tr data dekhate hobe start
@@ -141,7 +149,12 @@ async function run() {
     app.get('/job-applications', verifyToken, async (req, res) => {
       const email = req.query.email;
       const query = { applicant_email: email };
-      // console.log('cookie', req.cookies);
+
+      console.log(req.cookies?.token);
+      // token email !== query email
+      if(req.user.email !== req.query.email){
+        return res.status(403).send({message: 'forbidden'})
+      }
 
       if (req.user.email !== req.query.email) {
         return res.status(403).send({ message: 'forbidden access'})
